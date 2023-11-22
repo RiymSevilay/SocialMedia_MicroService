@@ -126,9 +126,13 @@ public class AuthController {
         }
     }
 
-
-    @GetMapping("find_by_role")
-    public ResponseEntity<List<RoleResponseDto>> findByRole(@RequestParam String role) {
+    /**
+     * Auth tan Role gireceğiz (User), bulduğumuz bütün bu USER ların authId lerini alıp userProfile a göndereceğiz.
+     * UserProfile da findOptionalByAuthId methodunu kullanıp her bir authId denk gelen UserProfile ı bulacağız,
+     * çünkü geriye UserProfile dönmek istiyoruz
+     */
+    @GetMapping(FINDBYROLE)
+    public ResponseEntity<List<Long>> findByRole(@RequestParam String role) {
         return ResponseEntity.ok(authService.findByRole(role));
     }
 

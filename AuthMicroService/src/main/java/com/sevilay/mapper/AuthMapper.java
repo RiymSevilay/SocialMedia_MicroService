@@ -24,8 +24,5 @@ public interface AuthMapper {
     @Mapping(source = "id", target = "authId")
     UserCreateRequestDto fromAuthToUserCreateRequestDto(Auth auth);
 
-    List<RoleResponseDto> fromAuthToRoleResponses(List<Auth> authList);
-
-    RoleResponseDto fromRoleResponseDtoToAuth(Auth auth);
 
 }

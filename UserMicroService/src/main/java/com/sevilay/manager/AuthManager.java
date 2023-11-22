@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
+import static com.sevilay.constants.RestApi.FINDBYROLE;
+
 @FeignClient(url = "http://localhost:7070/api/v1/auth", name = "userprofile-auth")
 public interface AuthManager {
 
     @PutMapping("/update_email_or_username")
     public ResponseEntity<Boolean> update(@RequestBody UpdateEmailOrUsernameRequestDto updateEmailOrUsernameRequestDto);
 
-    @GetMapping("find_by_role")
-    public ResponseEntity<List<UserProfile>> findByRole(@RequestParam String role);
+    @GetMapping(FINDBYROLE)
+    public ResponseEntity<List<Long>> findByRole(@RequestParam String role);
 
     }

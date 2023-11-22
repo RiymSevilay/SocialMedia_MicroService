@@ -2,7 +2,6 @@ package com.sevilay.service;
 
 import com.sevilay.dto.request.*;
 import com.sevilay.dto.response.RegisterResponseDto;
-import com.sevilay.dto.response.RoleResponseDto;
 import com.sevilay.exception.AuthServiceException;
 import com.sevilay.exception.ErrorType;
 import com.sevilay.manager.UserManager;
@@ -14,16 +13,12 @@ import com.sevilay.utility.JwtTokenManager;
 import com.sevilay.utility.ServiceManager;
 import com.sevilay.utility.enums.Role;
 import com.sevilay.utility.enums.Status;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import javax.management.relation.RoleList;
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,12 +29,15 @@ public class AuthService extends ServiceManager<Auth, Long> {
 
     private JwtTokenManager jwtTokenManager;
 
+    private final CacheManager cacheManager;
 
-    public AuthService(AuthRepository authRepository, UserManager userManager, JwtTokenManager jwtTokenManager) {
+
+    public AuthService(AuthRepository authRepository, UserManager userManager, JwtTokenManager jwtTokenManager, CacheManager cacheManager) {
         super(authRepository);
         this.authRepository = authRepository;
         this.userManager = userManager;
         this.jwtTokenManager = jwtTokenManager;
+        this.cacheManager = cacheManager;
     }
 
     /**
@@ -56,13 +54,15 @@ public class AuthService extends ServiceManager<Auth, Long> {
     public RegisterResponseDto register(RegisterRequestDto dto) {
         Auth auth = AuthMapper.INSTANCE.fromRegisterRequestToAuth(dto);
         auth.setActivationCode(CodeGenerator.generateCode());
-        save(auth);
+
         try {
+            save(auth);
             userManager.createUser(AuthMapper.INSTANCE.fromAuthToUserCreateRequestDto(auth));
+            cacheManager.getCache("findbyrole").evict(auth.getRole().toString().toUpperCase());
         } catch (Exception e) {
             //         delete(auth); -> Transactional
         }
-        userManager.createUser(AuthMapper.INSTANCE.fromAuthToUserCreateRequestDto(auth));
+
         return AuthMapper.INSTANCE.fromAuthToRegisterResponse(auth);
     }
 
@@ -138,14 +138,19 @@ public class AuthService extends ServiceManager<Auth, Long> {
 
     }
 
-    public List<RoleResponseDto> findByRole(String role) {
+    public List<Long> findByRole(String role) {
+        Role myRole;
         try {
-            Role roles = Role.valueOf(role.toUpperCase());
-            return AuthMapper.INSTANCE.fromAuthToRoleResponses(authRepository.findAllOptionalByRole(roles));
+            //admin->toUpperCase =ADMİN -> Locale.ENGLISH = ADMIN olacak
+            myRole = Role.valueOf(role.toUpperCase(Locale.ENGLISH));
         } catch (Exception e) {
          throw new AuthServiceException(ErrorType.ROLE_NOT_FOUND);
         }
-
-
+        /**
+         * authRepository.findAllByRole(myRole) -> auth role listesi dönecek
+         * stream().map(a->a.getId()).collect(Collectors.toList()); -> her bir auth un id sini alıp,
+         * bunu yeni bir liste olarak döneceğiz
+         */
+        return authRepository.findAllByRole(myRole).stream().map(x->x.getId()).collect(Collectors.toList());
     }
 }

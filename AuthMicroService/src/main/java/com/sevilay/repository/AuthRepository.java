@@ -15,4 +15,6 @@ public interface AuthRepository extends JpaRepository<Auth, Long> {
 
     List<Auth> findAllOptionalByRole(Role role);
 
+    List<Auth> findAllByRole(Role role);
+
 }

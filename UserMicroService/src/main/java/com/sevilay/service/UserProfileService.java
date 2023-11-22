@@ -4,7 +4,6 @@ package com.sevilay.service;
 import com.sevilay.dto.request.UpdateEmailOrUsernameRequestDto;
 import com.sevilay.dto.request.UserCreateRequestDto;
 import com.sevilay.dto.request.UserProfileUpdateRequestDto;
-import com.sevilay.dto.response.RoleResponseDto;
 import com.sevilay.exception.ErrorType;
 import com.sevilay.exception.UserServiceException;
 import com.sevilay.manager.AuthManager;
@@ -117,11 +116,25 @@ public class UserProfileService extends ServiceManager<UserProfile, Long> {
         return userProfile.get();
     }
 
-    @Cacheable(value = "findbyrole", key = "#role.toUpperCase()")
+    @Cacheable(value = "findbyrole", key = "#role.toUpperCase()") //bu cache'i register methodunda sıfırlayacağız
     public List<UserProfile> findByRole(String role) {
-        List<UserProfile> roleList = authManager.findByRole(role).getBody();
-        roleList.stream().forEach(u -> System.out.println(u));
-        roleList.stream().map(u -> userRepository.findOptionalByAuthId(u.getId()).get()).collect(Collectors.toList());
-        return roleList;
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+//        ResponseEntity<List<Long>> authIds = authManager.findByRole(role);
+        List<Long> authIds = authManager.findByRole(role).getBody();
+        /**
+         * authManager dan bulduğumuz rollerin authId lerini getireceğiz
+         * her bir authId için denk gelen UserProfile ı bulup listemize ekleyeceğiz
+         * bunu streamlerle yapıp herbir authId yi bir UserProfile çevirip
+         * collect(Collectors) diyip dışarıya UserProfile list döndüreceğiz
+         * .orElseThrow(() buradaki boş parantez x,y,.. bütün paramatreler demek
+         */
+        return authIds.stream().map(x -> userRepository.findOptionalByAuthId(x)
+                .orElseThrow(() -> {
+                    throw new UserServiceException(ErrorType.USER_NOT_FOUND);
+                })).collect(Collectors.toList());
     }
 }
