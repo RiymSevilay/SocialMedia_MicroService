@@ -9,7 +9,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Api-Gateway-Service" />
             <option value="$PROJECT_DIR$/AuthMicroService" />
+            <option value="$PROJECT_DIR$/Config-Server" />
+            <option value="$PROJECT_DIR$/Config-Server-Git" />
             <option value="$PROJECT_DIR$/UserMicroService" />
           </set>
         </option>

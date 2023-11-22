@@ -1,17 +1,20 @@
-package com.sevilay.dto.request;
+package com.sevilay.dto.response;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeletionRequestDto {
+public class RoleResponseDto {
 
-    private Long authId;
+    private Long id;
 
+    private String username;
 
 }

@@ -46,20 +46,26 @@ allprojects {
 
     dependencies {
 
-        implementation          libs.springBootWeb
-        implementation          libs.springBootValidation
-        implementation          libs.lombok
-        annotationProcessor     libs.lombok
-        implementation          libs.openapi
-        implementation          libs.mapStruct
-        annotationProcessor     libs.mapStructProcessor
-        implementation          libs.springOpenFeign
-        implementation          libs.javaJwt
+        implementation      libs.springBootWeb
+        implementation      libs.springBootValidation
+        implementation      libs.lombok
+        annotationProcessor libs.lombok
+        implementation      libs.openapi
+        implementation      libs.mapStruct
+        annotationProcessor libs.mapStructProcessor
+        implementation      libs.springOpenFeign
+        implementation      libs.javaJwt
+        implementation      libs.springBootDataRedis
+
+
+
+//        implementation libs.springCloudSleuthZipkin
+//        implementation libs.springCloudSleuth
 
     }
 
     configurations {
-        compileOnly{
+        compileOnly {
             extendsFrom annotationProcessor
         }
     }

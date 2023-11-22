@@ -15,26 +15,29 @@ import java.util.Optional;
 
 @Service
 public class JwtTokenManager {
-    //@Value("${jwt.secretkey}")
-    String secretKey = "socialmediaauthsecretkey";
-   // @Value("${jwt.issuer}") //token üreticisi
-    String issuer = "socialmediaauthissuer";
-   // @Value("${jwt.audience}") //token kullanıcısı
-    String audience = "socialmediaauthaudience";
 
-    Long expiration = System.currentTimeMillis() + 1000 * 60 * 5;
+    @Value("${jwt.secretkey}")
+    String secretKey;
+    @Value("${jwt.issuer}")
+    String issuer;
+    @Value("${jwt.audience}")
+    String audience;
+
+    Long expiration = System.currentTimeMillis() + (1000 * 60 * 5);
+
 
     public Optional<String> createToken2(Long id) {
         String token = null;
         Date date = new Date(expiration);
         try {
             token = JWT.create()
-                    .withIssuer(issuer)
                     .withAudience(audience)
+                    .withIssuer(issuer)
                     .withIssuedAt(new Date())
                     .withExpiresAt(date)
                     .withClaim("id", id)
                     .sign(Algorithm.HMAC512(secretKey));
+
             return Optional.of(token);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -42,14 +45,13 @@ public class JwtTokenManager {
         }
     }
 
-
     public Optional<String> createToken(Long id, Role role) {
         String token = null;
         Date date = new Date(expiration);
         try {
             token = JWT.create()
-                    .withIssuer(issuer)
                     .withAudience(audience)
+                    .withIssuer(issuer)
                     .withIssuedAt(new Date())
                     .withExpiresAt(date)
                     .withClaim("id", id)
@@ -62,13 +64,6 @@ public class JwtTokenManager {
         }
     }
 
-
-    /**
-     * Aldığımız token ı doğrulama methodu
-     *
-     * @param token
-     * @return
-     */
     public Boolean validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC512(secretKey);
@@ -100,7 +95,6 @@ public class JwtTokenManager {
         }
     }
 
-
     public Optional<String> getRoleFromToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC512(secretKey);
@@ -109,13 +103,14 @@ public class JwtTokenManager {
             if (decodedJWT == null) {
                 throw new AuthServiceException(ErrorType.INVALID_TOKEN);
             }
-         String role = decodedJWT.getClaim("role").asString();
+            String role = decodedJWT.getClaim("role").asString();
             return Optional.of(role);
         } catch (Exception e) {
             e.getMessage();
             throw new AuthServiceException(ErrorType.INVALID_TOKEN);
         }
     }
+
 
 
 }

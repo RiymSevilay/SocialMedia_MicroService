@@ -1,0 +1,28 @@
+server:
+  port: 7070
+
+spring:
+#  zipkin:
+#    enable: true
+#    base-url: http://localhost:9411
+#    service:
+#      name: auth-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/SocialMediaAuthDB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+
+jwt:
+  secretkey: ${SocialMediaSecretKey}
+  issuer: ${SocialMediaIssuer}
+  audience: ${SocialMediaAudienceSecretKey}

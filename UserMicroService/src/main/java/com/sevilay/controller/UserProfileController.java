@@ -1,13 +1,15 @@
 package com.sevilay.controller;
 
-import com.sevilay.dto.request.DeletionRequestDto;
 import com.sevilay.dto.request.UserCreateRequestDto;
 import com.sevilay.dto.request.UserProfileUpdateRequestDto;
+import com.sevilay.repository.entity.UserProfile;
 import com.sevilay.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.List;
 
 import static com.sevilay.constants.RestApi.*;
 
@@ -28,9 +30,31 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.activateStatus(authId));
     }
 
-    @GetMapping(DELETEBYID)
-    public ResponseEntity<Boolean> deletionStatus(@RequestBody DeletionRequestDto dto){
-        return ResponseEntity.ok(userProfileService.deletionStatus(dto));
+    @PostMapping(UPDATE)
+    public ResponseEntity<Boolean> update(@RequestBody UserProfileUpdateRequestDto dto){
+        return ResponseEntity.ok(userProfileService.update(dto));
     }
 
+
+    @DeleteMapping(DELETEBYID)
+    public ResponseEntity<Boolean> delete(@RequestParam Long authId) {
+        return ResponseEntity.ok(userProfileService.delete(authId));
+    }
+
+
+    @GetMapping(FINDALL)
+    public ResponseEntity<List<UserProfile>> findAll() {
+        return ResponseEntity.ok(userProfileService.findAll());
+    }
+
+
+    @GetMapping("/find_by_username")
+    public ResponseEntity<UserProfile> findByUsername(@RequestParam String username) {
+        return ResponseEntity.ok(userProfileService.findByUsername(username));
+    }
+
+    @GetMapping("find_by_role")
+    public ResponseEntity<List<UserProfile>> findByRole(@RequestParam String role) {
+        return ResponseEntity.ok(userProfileService.findByRole(role));
+    }
 }

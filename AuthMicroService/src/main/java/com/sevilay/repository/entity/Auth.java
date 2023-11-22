@@ -28,8 +28,6 @@ public class Auth extends BaseEntity {
 
     private String activationCode;
 
-    private String deletionCode;
-
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

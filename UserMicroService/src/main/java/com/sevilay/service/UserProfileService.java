@@ -1,10 +1,10 @@
 package com.sevilay.service;
 
 
-import com.sevilay.dto.request.DeletionRequestDto;
 import com.sevilay.dto.request.UpdateEmailOrUsernameRequestDto;
 import com.sevilay.dto.request.UserCreateRequestDto;
 import com.sevilay.dto.request.UserProfileUpdateRequestDto;
+import com.sevilay.dto.response.RoleResponseDto;
 import com.sevilay.exception.ErrorType;
 import com.sevilay.exception.UserServiceException;
 import com.sevilay.manager.AuthManager;
@@ -14,9 +14,12 @@ import com.sevilay.repository.entity.UserProfile;
 import com.sevilay.utility.JwtTokenManager;
 import com.sevilay.utility.ServiceManager;
 import com.sevilay.utility.enums.Status;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserProfileService extends ServiceManager<UserProfile, Long> {
@@ -90,9 +93,9 @@ public class UserProfileService extends ServiceManager<UserProfile, Long> {
     }
 
 
-    public Boolean deletionStatus(DeletionRequestDto dto) {
-        Optional<UserProfile> userProfile = userRepository.findOptionalByAuthId(dto.getAuthId());
-        if (userProfile.isEmpty()){
+    public Boolean delete(Long authId) {
+        Optional<UserProfile> userProfile = userRepository.findOptionalByAuthId(authId);
+        if (userProfile.isEmpty()) {
             throw new UserServiceException(ErrorType.USER_NOT_FOUND);
         }
         userProfile.get().setStatus(Status.DELETED);
@@ -100,4 +103,25 @@ public class UserProfileService extends ServiceManager<UserProfile, Long> {
         return true;
     }
 
+    @Cacheable(value = "findbyusername", key = "#username.toLowerCase()")
+    public UserProfile findByUsername(String username) { //DeneME1 -> deneme1, ->cacheleyecek
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        Optional<UserProfile> userProfile = userRepository.findOptionalByUsernameIgnoreCase(username);
+        if (userProfile.isEmpty()) {
+            throw new UserServiceException(ErrorType.USER_NOT_FOUND);
+        }
+        return userProfile.get();
+    }
+
+    @Cacheable(value = "findbyrole", key = "#role.toUpperCase()")
+    public List<UserProfile> findByRole(String role) {
+        List<UserProfile> roleList = authManager.findByRole(role).getBody();
+        roleList.stream().forEach(u -> System.out.println(u));
+        roleList.stream().map(u -> userRepository.findOptionalByAuthId(u.getId()).get()).collect(Collectors.toList());
+        return roleList;
+    }
 }

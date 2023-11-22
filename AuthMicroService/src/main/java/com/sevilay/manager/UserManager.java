@@ -1,7 +1,6 @@
 package com.sevilay.manager;
 
 
-import com.sevilay.dto.request.DeletionRequestDto;
 import com.sevilay.dto.request.UserCreateRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +20,6 @@ public interface UserManager {
     public ResponseEntity<Boolean> activateStatus(@PathVariable Long authId);
 
     @GetMapping(DELETEBYID)
-    public ResponseEntity<Boolean> deletionStatus(@RequestBody DeletionRequestDto dto);
+    public ResponseEntity<Boolean> delete(@RequestParam Long id);
 
 }

@@ -1,4 +1,10 @@
 rootProject.name = 'SocialMedia_MicroService'
 include 'AuthMicroService'
 include 'UserMicroService'
+include 'Config-Server'
+include 'Config-Server-Git'
+include 'Api-Gateway-Service'
+
+findProject(':config-server-git')?.name = 'Config-Server-Git'
+
 

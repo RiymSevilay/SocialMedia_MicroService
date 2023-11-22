@@ -2,12 +2,16 @@ package com.sevilay.controller;
 
 import com.sevilay.dto.request.*;
 import com.sevilay.dto.response.RegisterResponseDto;
+import com.sevilay.dto.response.RoleResponseDto;
 import com.sevilay.repository.entity.Auth;
 import com.sevilay.service.AuthService;
 import com.sevilay.utility.JwtTokenManager;
 import com.sevilay.utility.enums.Role;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +23,17 @@ import static com.sevilay.constants.RestApi.*;
 @RequestMapping(AUTH)
 @RequiredArgsConstructor
 public class AuthController {
+    /**
+     * 21.11.2023 - redis
+     * <p>
+     * findByUsername methodu yazalım, bu methodu service'te cache'leyelim
+     */
 
     private final AuthService authService;
 
     private final JwtTokenManager jwtTokenManager;
+
+    private final CacheManager cacheManager; //anatasyonsuz rediste silme işlemi yapmak için -> redisDelete2
 
     @PostMapping(REGISTER)
     public ResponseEntity<RegisterResponseDto> register(@RequestBody @Valid RegisterRequestDto dto) {
@@ -69,9 +80,57 @@ public class AuthController {
         return ResponseEntity.ok(authService.updateEmailOrUsername(updateEmailOrUsernameRequestDto));
     }
 
-    @PutMapping(DELETEBYID + "/{id}")
-    public ResponseEntity<Boolean> deletionStatus(@PathVariable  Long id){
-        return ResponseEntity.ok(authService.deletionStatus(id));
+
+    @DeleteMapping(DELETEBYID)
+    public ResponseEntity<Boolean> delete(Long id) {//@RequestParam
+        return ResponseEntity.ok(authService.delete(id));
     }
+
+
+    @DeleteMapping(DELETEBYTOKEN)
+    public ResponseEntity<Boolean> deleteByToken(String token) {
+        return ResponseEntity.ok(authService.deleteByToken(token));
+    }
+
+    /**
+     * swagger da sayfayı inceleden redisin çalışma yapısını ve süresini inceleyebiliriz.
+     *
+     * @param value
+     * @return
+     */
+    @GetMapping("/redis")
+    @Cacheable(value = "redisexample") //@Cacheable -> Önbelleklenebilir
+    public String redisExample(@RequestParam String value) {
+        try {
+            Thread.sleep(2000);
+            return value;
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
+    @GetMapping("/redisdelete")
+    @CacheEvict(cacheNames = "redisexample", allEntries = true)//@CacheEvict -> Önbellek tahliyesi bütün verileri siler
+    public void redisDelete() {
+
+    }
+
+    @GetMapping("/redisdelete2")
+    public Boolean redisDelete2() {
+        try {
+            cacheManager.getCache("redisexample").clear(); //"redisexample" etiketli bütün cache'leri temizler.
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    @GetMapping("find_by_role")
+    public ResponseEntity<List<RoleResponseDto>> findByRole(@RequestParam String role) {
+        return ResponseEntity.ok(authService.findByRole(role));
+    }
+
 
 }

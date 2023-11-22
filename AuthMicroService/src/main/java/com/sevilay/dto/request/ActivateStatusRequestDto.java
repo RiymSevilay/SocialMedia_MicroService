@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeletionRequestDto {
+public class ActivateStatusRequestDto {
 
-    private Long authId;
+    Long authId;
 
 }
